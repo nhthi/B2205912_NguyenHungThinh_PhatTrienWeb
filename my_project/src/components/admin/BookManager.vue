@@ -35,16 +35,16 @@
                 <tr v-for="(book, index) in filteredBooks" :key="book._id">
                     <td>{{ index + 1 }}</td>
                     <td>
-                        <img :src="book.coverImage" alt="Bìa sách" class="w-20 h-28 object-cover rounded shadow my-2" />
+                        <img :src="book.anh_bia" alt="Bìa sách" class="w-20 h-28 object-cover rounded shadow my-2" />
                     </td>
-                    <td>{{ book.title }}</td>
-                    <td>{{ book.author }}</td>
-                    <td>{{ book.category }}</td>
+                    <td>{{ book.ten_sach }}</td>
+                    <td>{{ book.ten_tac_gia }}</td>
+                    <td>{{ book.ten_the_loai }}</td>
 
-                    <td>{{ book.publisher }}</td>
-                    <td>{{ book.publishYear }}</td>
-                    <td>{{ book.quantity }}</td>
-                    <td>{{ book.description }}</td>
+                    <td>{{ book.ten_nxb }}</td>
+                    <td>{{ book.nam_xuat_ban }}</td>
+                    <td>{{ book.so_luong }}</td>
+                    <td>{{ book.mo_ta }}</td>
                     <td>
                         <v-btn icon color="blue" @click="$router.push(`/admin/books/edit/${book._id}`)">
                             <v-icon>mdi-pencil</v-icon>
@@ -70,17 +70,17 @@
                         </Field>
 
                         <Field name="authorId" v-slot="{ field, errorMessage }">
-                            <v-select v-bind="field" :items="authors" item-title="name" item-value="_id" label="Tác giả"
-                                :error-messages="errorMessage" />
+                            <v-select v-bind="field" :items="authors" item-title="ho_ten" item-value="_id"
+                                label="Tác giả" :error-messages="errorMessage" />
                         </Field>
 
                         <Field name="categoryId" v-slot="{ field, errorMessage }">
-                            <v-select v-bind="field" :items="categories" item-title="name" item-value="_id"
+                            <v-select v-bind="field" :items="categories" item-title="ten_the_loai" item-value="_id"
                                 label="Thể loại" :error-messages="errorMessage" />
                         </Field>
 
                         <Field name="publisherId" v-slot="{ field, errorMessage }">
-                            <v-select v-bind="field" :items="publishers" item-title="name" item-value="_id"
+                            <v-select v-bind="field" :items="publishers" item-title="ten_nxb" item-value="_id"
                                 label="Nhà xuất bản" :error-messages="errorMessage" />
                         </Field>
 
@@ -145,9 +145,9 @@ const bookSchema = yup.object({
 // Lọc danh sách theo từ khóa
 const filteredBooks = computed(() =>
     books.value.filter(b =>
-        b.title.toLowerCase().includes(search.value.toLowerCase()) ||
-        b.author.toLowerCase().includes(search.value.toLowerCase()) ||
-        b.publisher.toLowerCase().includes(search.value.toLowerCase())
+        b.ten_sach.toLowerCase().includes(search.value.toLowerCase()) ||
+        b.ten_tac_gia.toLowerCase().includes(search.value.toLowerCase()) ||
+        b.ten_nxb.toLowerCase().includes(search.value.toLowerCase())
     )
 )
 async function fetchAuthors() {
@@ -168,7 +168,7 @@ async function fetchPublishers() {
 async function fetchBooks() {
     try {
         const res = await api.get('/api/books/details')
-        books.value = res.data
+        books.value = res.data.reverse()
     } catch (err) {
         console.error('Lỗi khi tải sách:', err.response?.data?.message || err.message)
     }
@@ -187,8 +187,20 @@ function closeDialog() {
 
 // Lưu sách (thêm hoặc cập nhật)
 async function saveBook(values) {
+    console.log(values);
+
     try {
-        await api.post('/api/books', values)
+        const payload = {
+            ma_tac_gia: values.authorId,
+            ten_sach: values.title,
+            anh_bia: values.coverImage,
+            ma_the_loai: values.categoryId,
+            mo_ta: values.description,
+            ma_nxb: values.publisherId,
+            nam_xuat_ban: values.publishYear,
+            so_luong: values.quantity
+        }
+        await api.post('/api/books', payload)
         message.value = 'Thêm sách thành công!'
 
         messageType.value = 'success'

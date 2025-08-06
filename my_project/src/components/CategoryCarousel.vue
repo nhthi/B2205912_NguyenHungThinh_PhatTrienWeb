@@ -2,9 +2,9 @@
     <v-container class="py-6">
         <h3 class="font-weight-bold mb-4">📚 Danh mục sách</h3>
         <v-slide-group show-arrows>
-            <v-slide-group-item v-for="category in categories" :key="category.id">
+            <v-slide-group-item v-for="category in categories" :key="category._id">
                 <v-chip class="ma-2" color="black" text-color="white" pill @click="selectCategory(category._id)">
-                    {{ category.name }}
+                    {{ category.ten_the_loai }}
                 </v-chip>
             </v-slide-group-item>
 

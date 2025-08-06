@@ -3,14 +3,14 @@
         <v-card class="rounded-2xl shadow-md bg-white p-6">
             <!-- Thông tin sách -->
             <div class="grid md:grid-cols-2 gap-8 mb-10 px-6" v-if="book">
-                <v-img :src="book.coverImage" class="rounded-xl shadow h-96 object-contain"></v-img>
+                <v-img :src="book.anh_bia" class="rounded-xl shadow h-96 object-contain"></v-img>
                 <div class="flex flex-col justify-between">
                     <div>
-                        <h1 class="text-3xl font-semibold text-gray-900 mb-2">{{ book.title }}</h1>
+                        <h1 class="text-3xl font-semibold text-gray-900 mb-2">{{ book.ten_sach }}</h1>
                         <p class="text-gray-600 text-sm mb-4">
-                            Tác giả: <span class="font-medium">{{ book.author.name }}</span>
+                            Tác giả: <span class="font-medium">{{ book.tacgia.ho_ten }}</span>
                         </p>
-                        <p class="text-gray-600 mb-6">{{ book.description }}</p>
+                        <p class="text-gray-600 mb-6">{{ book.mo_ta }}</p>
                         <div class="flex items-center flex-wrap gap-3 text-gray-700 text-sm">
                             <div class="flex items-center gap-1">
                                 <v-icon size="20">mdi-book-open-page-variant</v-icon>
@@ -18,11 +18,11 @@
                             </div>
                             <div class="flex items-center gap-1">
                                 <v-icon size="20">mdi-calendar</v-icon>
-                                <span>Xuất bản: {{ book.publishYear }}</span>
+                                <span>Xuất bản: {{ book.nam_xuat_ban }}</span>
                             </div>
                             <div class="flex items-center gap-1">
                                 <v-icon size="20">mdi-tag</v-icon>
-                                <span>Thể loại: {{ book.category.name }}</span>
+                                <span>Thể loại: {{ book.theloai.ten_the_loai }}</span>
                             </div>
                         </div>
                     </div>
@@ -154,13 +154,15 @@ export default {
         try {
             const response = await api.get(`/api/books/${bookId}`)
             this.book = response.data
+            console.log(this.book);
+
             // Gọi API lấy comment theo bookId
             const commentsRes = await api.get(`/api/comments/books/${bookId}`);
             this.reviews = commentsRes.data.map(c => ({
-                name: c.user?.name || "Ẩn danh",
-                comment: c.content,
-                rating: c.rating || 3,
-                createAt: c.createdAt
+                name: c.user?.ho_ten || "Ẩn danh",
+                comment: c.noi_dung,
+                rating: c.ti_le || 3,
+                createAt: c.ngay_tao
             })).reverse();
 
         } catch (error) {
@@ -184,10 +186,10 @@ export default {
 
             try {
                 const payload = {
-                    userId: userId,
-                    bookId: this.book._id,
-                    content: this.newReview.comment,
-                    rating: this.newReview.rating,
+                    ma_doc_gia: userId,
+                    ma_sach: this.book._id,
+                    noi_dung: this.newReview.comment,
+                    ti_le: this.newReview.rating,
                 };
 
                 const res = await api.post("/api/comments", payload);
@@ -195,8 +197,8 @@ export default {
                 // Cập nhật danh sách đánh giá
                 this.reviews.unshift({
                     name: user.name,
-                    comment: payload.content,
-                    rating: payload.rating,
+                    comment: payload.noi_dung,
+                    rating: payload.ti_le,
                     createAt: new Date().toISOString()
                 });
 
@@ -232,16 +234,16 @@ export default {
             const user = JSON.parse(localStorage.getItem("user"));
             const userId = user?.id;
             if (!userId) {
-                this.borrowErrorMessage = "❌ Người dùng không tồn tại!";
+                this.borrowErrorMessage = "❌Vui lòng đăng nhập để mượn sách!";
                 return;
             }
             try {
                 const response = await api.post("/api/borrows", {
-                    userId: userId,
-                    bookId: this.book._id,
-                    quantity: this.borrowForm.quantity,
-                    borrowDate: this.borrowForm.borrowDate,
-                    dueDate: this.dueDate,
+                    ma_doc_gia: userId,
+                    ma_sach: this.book._id,
+                    so_luong: this.borrowForm.quantity,
+                    ngay_muon: this.borrowForm.borrowDate,
+                    han_tra: this.dueDate,
                 });
 
                 alert("✅ Đăng ký mượn sách thành công!");

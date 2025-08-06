@@ -28,13 +28,13 @@
             <tbody>
                 <tr v-for="(reader, index) in filteredReaders" :key="reader._id">
                     <td>{{ index + 1 }}</td>
-                    <td>{{ reader.name }}</td>
+                    <td>{{ reader.ho_ten }}</td>
                     <td>{{ reader.email }}</td>
-                    <td>{{ reader.phone || '' }}</td>
-                    <td>{{ reader.address || '' }}</td>
+                    <td>{{ reader.so_dien_thoai || '' }}</td>
+                    <td>{{ reader.dia_chi || '' }}</td>
                     <td>
-                        <v-chip :color="reader.status === 'active' ? 'green' : 'red'" variant="flat" size="small">
-                            {{ reader.status === 'active' ? 'Hoạt động' : 'Khoá' }}
+                        <v-chip :color="reader.trang_thai === 'active' ? 'green' : 'red'" variant="flat" size="small">
+                            {{ reader.trang_thai === 'active' ? 'Hoạt động' : 'Khoá' }}
                         </v-chip>
                     </td>
                     <td>
@@ -55,6 +55,13 @@
                     {{ "Thêm Độc giả" }}
                 </v-card-title>
                 <v-card-text>
+                    <span v-if="message" :class="{
+                        'text-green-600': messageType === 'success',
+                        'text-red-600': messageType === 'error',
+                        'block text-center mb-4 font-medium': true
+                    }">
+                        {{ message }}
+                    </span>
                     <Form @submit="saveReader" :validation-schema="readerSchema">
                         <Field name="name" v-slot="{ field, errorMessage, handleBlur }">
                             <v-text-field v-bind="field" @blur="handleBlur" :error-messages="errorMessage" label="Tên"
@@ -77,7 +84,7 @@
                                 label="Mật khẩu" type="password" clearable />
                         </Field>
                         <Field name="status" v-slot="{ field, errorMessage, handleBlur }">
-                            <v-select :items="['active', 'inactive']" v-bind="field" @blur="handleBlur"
+                            <v-select :items="['Hoạt động', 'Khóa']" v-bind="field" @blur="handleBlur"
                                 :error-messages="errorMessage" label="Trạng thái" clearable />
                         </Field>
                         <v-card-actions>
@@ -105,7 +112,6 @@ const props = defineProps({
     },
 });
 
-console.log(props.users);
 
 const message = ref('');
 const messageType = ref('');   // 'success' hoặc 'error'
@@ -134,13 +140,18 @@ function closeDialog() {
     dialog.value = false
 }
 async function saveReader(values) {
-    console.log(values);
+    const payload = {
+        ho_ten: values.name,
+        email: values.email,
+        so_dien_thoai: values.phone,
+        dia_chi: values.address,
+        mat_khau: values.password,
+        trang_thai: values.status === 'Khóa' ? 'inactive' : 'active',
+        vai_tro: 'reader'
 
+    }
     try {
-
-        console.log('Tao user');
-
-        const res = await api.post('/api/users/register', values);
+        const res = await api.post('/api/users/register', payload);
         message.value = 'Thêm độc giả thành công!';
         messageType.value = 'success';
 

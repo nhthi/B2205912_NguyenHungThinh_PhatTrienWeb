@@ -7,12 +7,12 @@
                     <img :src="user.avatar || 'https://cdn-icons-png.flaticon.com/512/8345/8345328.png'" alt="avatar" />
                 </v-avatar>
                 <div>
-                    <h2 class="text-2xl font-bold text-gray-900">{{ user.name }}</h2>
+                    <h2 class="text-2xl font-bold text-gray-900">{{ user.ho_ten }}</h2>
                     <p class="text-gray-600">{{ user.email }}</p>
-                    <p class="text-gray-600">{{ user.phone }}</p>
-                    <p class="text-gray-600">{{ user.address }}</p>
+                    <p class="text-gray-600">{{ user.so_dien_thoai }}</p>
+                    <p class="text-gray-600">{{ user.dia_chi }}</p>
                     <span class="inline-block mt-1 px-3 py-1 bg-black text-white text-sm rounded-full">
-                        {{ user.role }}
+                        {{ user.vai_tro === 'reader' ? 'Độc giả' : user.vai_tro === 'admin' ? 'Quản trị' : '' }}
                     </span>
                 </div>
                 <div class="ml-auto">
@@ -43,32 +43,34 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="book in borrowedBooks" :key="book.id" class="border-t">
+                    <tr v-for="book in borrowedBooks" :key="book._id" class="border-t">
                         <td class="py-2 px-3">
-                            <v-img :src="book.book.coverImage" max-width="50" height="70"
+                            <v-img :src="book.book.anh_bia" max-width="50" height="70"
                                 class="rounded shadow-sm"></v-img>
                         </td>
-                        <td class="py-2 px-3">{{ book.book.title }}</td>
-                        <th class="py-2 px-3 text-left">{{ book.quantity || 1 }}</th>
+                        <td class="py-2 px-3">{{ book.book.ten_sach }}</td>
+                        <th class="py-2 px-3 text-left">{{ book.so_luong || 1 }}</th>
 
-                        <td class="py-2 px-3">{{ formatDate(book.borrowDate) }}</td>
-                        <td class="py-2 px-3">{{ formatDate(book.dueDate) }}</td>
-                        <td class="py-2 px-3">{{ formatDate(book.returnDate) || '---' }}</td>
+                        <td class="py-2 px-3">{{ formatDate(book.ngay_muon) }}</td>
+                        <td class="py-2 px-3">{{ formatDate(book.han_tra) }}</td>
+                        <td class="py-2 px-3">{{ formatDate(book.ngay_tra) || '---' }}</td>
                         <td class="py-2 px-3">
-                            {{ new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(book.fine)
+                            {{ new Intl.NumberFormat('vi-VN', {
+                                style: 'currency', currency: 'VND'
+                            }).format(book.tien_phat)
                             }}
                         </td>
 
                         <td class="py-2 px-3">
                             <span :class="{
-                                'text-yellow-600 font-bold': book.status === 'pending',
-                                'text-blue-600 font-bold': book.status === 'borrowing',
-                                'text-green-600 font-bold': book.status === 'returned'
+                                'text-yellow-600 font-bold': book.trang_thai === 'pending',
+                                'text-blue-600 font-bold': book.trang_thai === 'borrowing',
+                                'text-green-600 font-bold': book.trang_thai === 'returned'
                             }">
                                 {{
-                                    book.status === 'pending'
+                                    book.trang_thai === 'pending'
                                         ? 'Chờ duyệt'
-                                        : book.status === 'borrowing'
+                                        : book.trang_thai === 'borrowing'
                                             ? 'Đang mượn'
                                             : 'Đã trả'
                                 }}
@@ -193,7 +195,12 @@ export default {
         },
         editProfile() {
             if (this.user) {
-                this.editForm = { ...this.user };
+                this.editForm = {
+                    name: this.user.ho_ten,
+                    email: this.user.email,
+                    phone: this.user.so_dien_thoai,
+                    address: this.user.dia_chi
+                };
                 this.editDialog = true;
             }
         },
@@ -208,7 +215,13 @@ export default {
                     this.serverError = "❗ Vui lòng nhập đầy đủ thông tin";
                     return;
                 }
-                const response = await api.put(`/api/users/${this.user._id}`, this.editForm);
+                const payload = {
+                    ho_ten: this.editForm.name,
+                    email: this.editForm.email,
+                    so_dien_thoai: this.editForm.phone,
+                    dia_chi: this.editForm.address
+                }
+                const response = await api.put(`/api/users/${this.user._id}`, payload);
                 this.user = response.data; // Cập nhật lại thông tin hiển thị
                 this.editDialog = false;
                 alert("✅ Cập nhật thông tin thành công!");
@@ -240,10 +253,10 @@ export default {
 
                 const response = await api.get(`/api/comments/users/${userId}`);
                 this.reviews = response.data.map(item => ({
-                    bookTitle: item.bookTitle,
-                    rating: item.rating,
-                    comment: item.content,
-                    date: this.formatDate(item.createdAt),
+                    bookTitle: item.ten_sach,
+                    rating: item.ti_le,
+                    comment: item.noi_dung,
+                    date: this.formatDate(item.ngay_tao),
                     _id: item._id
                 }));
             } catch (error) {

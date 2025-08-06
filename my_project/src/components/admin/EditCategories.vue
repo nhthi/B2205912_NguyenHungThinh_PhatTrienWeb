@@ -70,8 +70,8 @@ export default {
                 const category = response.data;
 
                 this.initialValues = {
-                    name: category.name || "",
-                    description: category.description || "",
+                    name: category.ten_the_loai || "",
+                    description: category.mo_ta || "",
                 };
 
                 this.formKey++;
@@ -83,7 +83,11 @@ export default {
         async submitForm(values) {
             const id = this.$route.params.id;
             try {
-                await api.put(`/api/categories/${id}`, values);
+                const payload = {
+                    ten_the_loai: values.name,
+                    mo_ta: values.description
+                }
+                await api.put(`/api/categories/${id}`, payload);
                 this.message = "Cập nhật thể loại thành công!";
                 this.messageType = "success";
             } catch (error) {

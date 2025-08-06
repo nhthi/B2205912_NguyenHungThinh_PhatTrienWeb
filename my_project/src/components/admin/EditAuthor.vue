@@ -76,9 +76,9 @@ export default {
                 const author = response.data;
 
                 this.initialValues = {
-                    name: author.name || "",
-                    nationality: author.nationality || "",
-                    biography: author.biography || "",
+                    name: author.ho_ten || "",
+                    nationality: author.quoc_tich || "",
+                    biography: author.tieu_su || "",
                 };
 
                 this.formKey++; // Re-render form
@@ -90,7 +90,12 @@ export default {
         async submitForm(values) {
             const id = this.$route.params.id;
             try {
-                await api.put(`/api/authors/${id}`, values);
+                const payload = {
+                    ho_ten: values.name,
+                    tieu_su: values.biography,
+                    quoc_tich: values.nationality
+                }
+                await api.put(`/api/authors/${id}`, payload);
                 this.message = "Cập nhật tác giả thành công!";
                 this.messageType = "success";
             } catch (error) {

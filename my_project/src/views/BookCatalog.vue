@@ -37,14 +37,14 @@
 
 
                     <div class="px-40 md:px-10 py-4">
-                        <v-img :src="book.coverImage" height="280" aspect-ratio="2/3" cover
+                        <v-img :src="book.anh_bia" height="280" aspect-ratio="2/3" cover
                             class="border-b border-gray-200"></v-img>
                     </div>
                     <v-card-title class="text-lg font-medium text-gray-900 pt-4">
-                        {{ book.title }}
+                        {{ book.ten_sach }}
                     </v-card-title>
                     <v-card-subtitle class="text-gray-500 text-sm">
-                        {{ book.author }}
+                        {{ book.ten_tac_gia }}
                     </v-card-subtitle>
                     <v-card-actions class="px-4 py-2 bg-gray-50 border-b border-gray-200">
                         <router-link :to="`/books/${book._id}`" class="no-underline">
@@ -70,7 +70,7 @@
                         <div v-show="expanded[book._id]">
                             <v-divider class="border-gray-200"></v-divider>
                             <v-card-text class="text-gray-600 text-sm">
-                                {{ book.description }}
+                                {{ book.mo_ta }}
                             </v-card-text>
                         </div>
                     </v-expand-transition>
@@ -125,12 +125,12 @@ export default {
                 const query = this.searchQuery.toLowerCase();
                 filtered = filtered.filter(
                     (book) =>
-                        book.title.toLowerCase().includes(query) ||
-                        book.author.toLowerCase().includes(query)
+                        book.ten_sach.toLowerCase().includes(query) ||
+                        book.ten_tac_gia.toLowerCase().includes(query)
                 );
             }
             if (this.selectedGenre && this.selectedGenre !== 'Tất cả') {
-                filtered = filtered.filter((book) => book.category === this.selectedGenre);
+                filtered = filtered.filter((book) => book.ten_the_loai === this.selectedGenre);
             }
             this.filteredBooks = filtered;
             this.currentPage = 1; // Reset về trang đầu tiên khi lọc
@@ -149,9 +149,10 @@ export default {
             try {
                 const booksRes = await api.get('/api/books/details')
 
+                console.log(booksRes);
 
                 this.books = booksRes.data || [];
-                this.genres = ['Tất cả', ...new Set(this.books.map(g => g.category))];
+                this.genres = ['Tất cả', ...new Set(this.books.map(g => g.ten_the_loai))];
                 this.filteredBooks = [...this.books];
             } catch (error) {
                 console.error("Lỗi khi tải dữ liệu sách/thể loại:", error);

@@ -28,8 +28,8 @@
             <tbody>
                 <tr v-for="(category, index) in filteredCategories" :key="category._id">
                     <td>{{ index + 1 }}</td>
-                    <td>{{ category.name }}</td>
-                    <td>{{ category.description }}</td>
+                    <td>{{ category.ten_the_loai }}</td>
+                    <td>{{ category.mo_ta }}</td>
 
                     <td>
                         <v-btn icon color="blue" @click="$router.push(`/admin/categories/edit/${category._id}`)">
@@ -93,7 +93,7 @@ const categorySchema = yup.object({
 
 const filteredCategories = computed(() =>
     categories.value.filter(c =>
-        c.name.toLowerCase().includes(search.value.toLowerCase())
+        c.ten_the_loai.toLowerCase().includes(search.value.toLowerCase())
     )
 )
 
@@ -109,8 +109,11 @@ function closeDialog() {
 
 async function saveCategory(values) {
     try {
-
-        await api.post('/api/categories', values)
+        const payload = {
+            ten_the_loai: values.name,
+            mo_ta: values.description
+        }
+        await api.post('/api/categories', payload)
         message.value = 'Thêm thể loại thành công!'
 
 
@@ -140,7 +143,7 @@ async function deleteCategory(id) {
 async function fetchCategories() {
     try {
         const res = await api.get('/api/categories')
-        categories.value = res.data
+        categories.value = res.data.reverse()
     } catch (err) {
         console.error('Lỗi khi lấy danh sách thể loại:', err.response?.data?.message || err.message)
     }

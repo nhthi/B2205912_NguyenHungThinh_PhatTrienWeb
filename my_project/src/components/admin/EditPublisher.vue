@@ -72,8 +72,8 @@ export default {
                 const publisher = response.data;
 
                 this.initialValues = {
-                    name: publisher.name || "",
-                    address: publisher.address || "",
+                    name: publisher.ten_nxb || "",
+                    address: publisher.dia_chi || "",
                 };
 
                 this.formKey++;
@@ -85,7 +85,11 @@ export default {
         async submitForm(values) {
             const id = this.$route.params.id;
             try {
-                await api.put(`/api/publishers/${id}`, values);
+                const payload = {
+                    ten_nxb: values.name,
+                    dia_chi: values.address
+                }
+                await api.put(`/api/publishers/${id}`, payload);
                 this.message = "Cập nhật nhà xuất bản thành công!";
                 this.messageType = "success";
             } catch (error) {

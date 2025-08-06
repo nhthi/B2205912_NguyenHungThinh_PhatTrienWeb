@@ -77,9 +77,9 @@ export default {
         async submitRegister(values) {
             try {
                 const response = await api.post('/api/users/register', {
-                    name: values.name,
+                    ho_ten: values.name,
                     email: values.email,
-                    password: values.password,
+                    mat_khau: values.password,
                 });
                 alert("Đăng ký thành công!");
                 this.$router.push('/login');

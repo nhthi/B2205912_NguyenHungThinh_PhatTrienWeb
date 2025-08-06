@@ -45,11 +45,9 @@ export default {
         async fetchUsers() {
             try {
                 const res = await api.get('/api/users')
-                const users = res.data
-                this.readers = users.filter(u => u.role === 'reader')
-                this.staff = users.filter(u => u.role === 'admin')
-                console.log("Readers:", this.readers)
-                console.log("Staff:", this.staff)
+                const users = res.data.reverse()
+                this.readers = users.filter(u => u.vai_tro === 'reader')
+                this.staff = users.filter(u => u.vai_tro === 'admin')
             } catch (error) {
                 console.error('Lỗi khi lấy danh sách người dùng:', error)
             }

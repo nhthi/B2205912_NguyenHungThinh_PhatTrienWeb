@@ -25,37 +25,43 @@
                     <th>Ngày trả thực</th>
                     <th>Tiền phạt</th>
                     <th>Trạng thái</th>
-                    <th>Trả sách</th>
+                    <th>Duyệt/ Trả</th>
                     <th>Hành động</th>
                 </tr>
             </thead>
             <tbody>
                 <tr v-for="(borrow, index) in filteredBorrows" :key="borrow._id">
                     <td>{{ index + 1 }}</td>
-                    <td>{{ borrow.user.name }}</td>
-                    <td>{{ borrow.book.title }}</td>
-                    <td>{{ formatDate(borrow.borrowDate) }}</td>
-                    <td>{{ formatDate(borrow.dueDate) }}</td>
+                    <td>{{ borrow.docgia.ho_ten }}</td>
+                    <td>{{ borrow.sach.ten_sach }}</td>
+                    <td>{{ formatDate(borrow.ngay_muon) }}</td>
+                    <td>{{ formatDate(borrow.han_tra) }}</td>
 
-                    <td>{{ borrow.returnDate ? formatDate(borrow.returnDate) : '---' }}</td>
+                    <td>{{ borrow.ngay_tra_thuc_te ? formatDate(borrow.ngay_tra_thuc_te) : '---' }}</td>
                     <td>
                         <span :class="{
-                            'text-red-600 font-semibold': borrow.fine > 0,
-                            'text-gray-500': borrow.fine === 0
+                            'text-red-600 font-semibold': borrow.tien_phat > 0,
+                            'text-gray-500': borrow.tien_phat === 0
                         }">
-                            {{ formatCurrency(borrow.fine) }}
+                            {{ formatCurrency(borrow.tien_phat) }}
                         </span>
                     </td>
                     <td>
                         <v-chip class="font-bold"
-                            :color="borrow.status === 'borrowing' ? 'blue' : borrow.status === 'pending' ? 'red' : 'green'"
+                            :color="borrow.trang_thai === 'borrowing' ? 'blue' : borrow.trang_thai === 'pending' ? 'red' : 'green'"
                             variant="flat">
-                            <span class="font-bold">{{ borrow.status }}</span>
+                            <span class="font-bold">{{ borrow.trang_thai === 'pending' ? 'Chờ duyệt' : borrow.trang_thai
+                                === 'borrowing' ? 'Đang mượn' : 'Đã trả' }}</span>
                         </v-chip>
                     </td>
-                    <td>
-                        <v-btn color="success" size="small" class="text-white font-bold"
-                            @click="handleReturn(borrow._id)" :disabled="borrow.status !== 'borrowing'">
+                    <td class="text-center">
+                        <v-btn v-if="borrow.trang_thai === 'pending'" color="warning" size="small"
+                            class="text-white font-bold" @click="handleApprove(borrow._id)">
+                            <v-icon size="18" class="mr-1">mdi-check</v-icon>
+                            <span class="font-bold">Duyệt</span>
+                        </v-btn>
+                        <v-btn v-else color="success" size="small" class="text-white font-bold"
+                            @click="handleReturn(borrow._id)" :disabled="borrow.trang_thai !== 'borrowing'">
                             <v-icon size="18" class="mr-1">mdi-check</v-icon>
                             <span class="font-bold">Trả sách</span>
                         </v-btn>
@@ -88,7 +94,9 @@ const messageType = ref('')
 const fetchBorrows = async () => {
     try {
         const res = await api.get('/api/borrows')
-        borrows.value = res.data
+        borrows.value = res.data.reverse()
+        console.log(borrows.value);
+
     } catch (err) {
         message.value = 'Lỗi khi tải dữ liệu'
         messageType.value = 'error'
@@ -100,7 +108,7 @@ onMounted(fetchBorrows)
 const filteredBorrows = computed(() => {
     const q = search.value.toLowerCase()
     return borrows.value.filter(
-        (b) => b.user.name.toLowerCase().includes(q) || b.book.title.toLowerCase().includes(q)
+        (b) => b.docgia.ho_ten.toLowerCase().includes(q) || b.sach.ten_sach.toLowerCase().includes(q)
     )
 })
 
@@ -121,6 +129,20 @@ async function handleReturn(borrowId) {
             returnDate: new Date().toISOString(), // hoặc dùng dayjs nếu cần định dạng
         });
         message.value = 'Trả sách thành công!'
+        messageType.value = 'success'
+        await fetchBorrows(); // ví dụ bạn có hàm này
+    } catch (error) {
+        message.value = 'Lỗi khi trả sách: ' + (err.response?.data?.message || err.message)
+        messageType.value = 'error'
+    }
+};
+
+async function handleApprove(borrowId) {
+    try {
+        await api.put(`/api/borrows/${borrowId}`, {
+            trang_thai: 'borrowing', // hoặc dùng dayjs nếu cần định dạng
+        });
+        message.value = 'Duyệt đăng ký mượn thành công!'
         messageType.value = 'success'
         await fetchBorrows(); // ví dụ bạn có hàm này
     } catch (error) {

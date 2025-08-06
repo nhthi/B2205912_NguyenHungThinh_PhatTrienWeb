@@ -25,21 +25,23 @@
                 </Field>
 
                 <Field name="authorId" v-slot="{ field, errors }">
-                    <v-select v-bind="field" :items="authors" item-title="name" item-value="_id" label="Tác giả"
+                    <v-select v-bind="field" :items="authors" item-title="ho_ten" item-value="_id" label="Tác giả"
                         prepend-inner-icon="mdi-account" variant="outlined" color="black" :error-messages="errors"
                         class="mb-2" :model-value="field.value" @update:model-value="field.value = $event" />
                 </Field>
 
                 <Field name="categoryId" v-slot="{ field, errors }">
-                    <v-select v-bind="field" :items="categories" item-title="name" item-value="_id" label="Thể loại"
-                        prepend-inner-icon="mdi-tag" variant="outlined" color="black" :error-messages="errors"
-                        class="mb-2" :model-value="field.value" @update:model-value="field.value = $event" />
+                    <v-select v-bind="field" :items="categories" item-title="ten_the_loai" item-value="_id"
+                        label="Thể loại" prepend-inner-icon="mdi-tag" variant="outlined" color="black"
+                        :error-messages="errors" class="mb-2" :model-value="field.value"
+                        @update:model-value="field.value = $event" />
                 </Field>
 
                 <Field name="publisherId" v-slot="{ field, errors }">
-                    <v-select v-bind="field" :items="publishers" item-title="name" item-value="_id" label="Nhà xuất bản"
-                        prepend-inner-icon="mdi-domain" variant="outlined" color="black" :error-messages="errors"
-                        class="mb-2" :model-value="field.value" @update:model-value="field.value = $event" />
+                    <v-select v-bind="field" :items="publishers" item-title="ten_nxb" item-value="_id"
+                        label="Nhà xuất bản" prepend-inner-icon="mdi-domain" variant="outlined" color="black"
+                        :error-messages="errors" class="mb-2" :model-value="field.value"
+                        @update:model-value="field.value = $event" />
                 </Field>
 
                 <Field name="publishYear" v-slot="{ field, errors }">
@@ -121,14 +123,14 @@ export default {
 
                 const book = bookRes.data
                 this.initialValues = {
-                    title: book.title,
-                    authorId: book.authorId || '',
-                    categoryId: book.categoryId || '',
-                    publisherId: book.publisherId || '',
-                    publishYear: book.publishYear,
-                    quantity: book.quantity,
-                    description: book.description,
-                    coverImage: book.coverImage,
+                    title: book.ten_sach,
+                    authorId: book.ma_tac_gia || '',
+                    categoryId: book.ma_the_loai || '',
+                    publisherId: book.ma_nxb || '',
+                    publishYear: book.nam_xuat_ban,
+                    quantity: book.so_luong,
+                    description: book.mo_ta,
+                    coverImage: book.anh_bia,
                 }
 
                 this.authors = authorsRes.data
@@ -143,7 +145,17 @@ export default {
         async submitForm(values) {
             const id = this.$route.params.id
             try {
-                await api.put(`/api/books/${id}`, values)
+                const payload = {
+                    ma_tac_gia: values.authorId,
+                    ten_sach: values.title,
+                    anh_bia: values.coverImage,
+                    ma_the_loai: values.categoryId,
+                    mo_ta: values.description,
+                    ma_nxb: values.publisherId,
+                    nam_xuat_ban: values.publishYear,
+                    so_luong: values.quantity
+                }
+                await api.put(`/api/books/${id}`, payload)
                 this.message = 'Cập nhật sách thành công!'
                 this.messageType = 'success'
                 setTimeout(() => this.$router.push('/admin/books'), 1000)

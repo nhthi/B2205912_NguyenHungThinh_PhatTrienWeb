@@ -39,13 +39,13 @@
                 </Field>
 
                 <Field name="status" v-slot="{ field, errors }">
-                    <v-select v-bind="field" :items="['active', 'inactive']" label="Trạng thái" variant="outlined"
+                    <v-select v-bind="field" :items="['Hoạt động', 'Khóa']" label="Trạng thái" variant="outlined"
                         color="black" :error-messages="errors" class="mb-2" :model-value="field.value"
                         @update:model-value="field.value = $event" />
                 </Field>
 
                 <Field name="role" v-slot="{ field, errors }">
-                    <v-select v-bind="field" :items="['reader', 'admin']" label="Vai trò" variant="outlined"
+                    <v-select v-bind="field" :items="['Độc giả', 'admin']" label="Vai trò" variant="outlined"
                         color="black" :error-messages="errors" class="mb-2" :model-value="field.value"
                         @update:model-value="field.value = $event" />
                 </Field>
@@ -100,12 +100,12 @@ export default {
                 const user = response.data;
 
                 this.initialValues = {
-                    name: user.name || "",
+                    name: user.ho_ten || "",
                     email: user.email || "",
-                    phone: user.phone || "",
-                    address: user.address || "",
-                    status: user.status || "active",
-                    role: user.role || "reader",
+                    phone: user.so_dien_thoai || "",
+                    address: user.dia_chi || "",
+                    status: user.trang_thai === 'active' ? 'Hoạt động' : 'Khóa' || "Hoạt động",
+                    role: user.vai_tro === 'admin' ? 'admin' : 'Độc giả' || "Độc giả",
                 };
 
                 this.formKey++; // Force re-render Form
@@ -118,7 +118,17 @@ export default {
             const id = this.$route.params.id;
 
             try {
-                await api.put(`/api/users/${id}`, values);
+                const payload = {
+                    ho_ten: values.name,
+                    email: values.email,
+                    so_dien_thoai: values.phone,
+                    dia_chi: values.address,
+                    mat_khau: values.password,
+                    trang_thai: values.status === 'Khóa' ? 'inactive' : 'active',
+                    vai_tro: values.role === 'admin' ? 'admin' : 'reader'
+
+                }
+                await api.put(`/api/users/${id}`, payload);
                 this.message = 'Cập nhật độc giả thành công!';
                 this.messageType = 'success';
             } catch (error) {

@@ -5,9 +5,9 @@
             <v-col v-for="(book, index) in books" :key="book.id" cols="12" sm="6" md="4">
                 <v-card class="hover:scale-[1.02] hover:shadow-lg transition-all duration-300 ease-in-out rounded-xl">
 
-                    <v-img :src="book.coverImage" height="200px"></v-img>
-                    <v-card-title>{{ book.title }}</v-card-title>
-                    <v-card-subtitle>{{ book.authorName }}</v-card-subtitle>
+                    <v-img :src="book.anh_bia" height="200px"></v-img>
+                    <v-card-title>{{ book.ten_sach }}</v-card-title>
+                    <v-card-subtitle>{{ book.ten_tac_gia }}</v-card-subtitle>
                     <v-card-actions class="px-4 py-2">
                         <v-btn color="black" variant="text" @click="goToBookDetail(book._id)">Chi tiết</v-btn>
 
@@ -22,7 +22,7 @@
                         <div v-show="expanded[index]">
                             <v-divider></v-divider>
                             <v-card-text class="text-body-2">
-                                {{ book.description }}
+                                {{ book.mo_ta }}
                             </v-card-text>
                         </div>
                     </v-expand-transition>

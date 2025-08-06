@@ -29,9 +29,9 @@
             <tbody>
                 <tr v-for="(author, index) in filteredAuthors" :key="author._id">
                     <td>{{ index + 1 }}</td>
-                    <td>{{ author.name }}</td>
-                    <td>{{ author.nationality }}</td>
-                    <td>{{ author.biography }}</td>
+                    <td>{{ author.ho_ten }}</td>
+                    <td>{{ author.quoc_tich }}</td>
+                    <td>{{ author.tieu_su }}</td>
                     <td>
                         <v-btn icon color="blue" @click="$router.push(`/admin/authors/edit/${author._id}`)">
                             <v-icon>mdi-pencil</v-icon>
@@ -106,7 +106,7 @@ const authors = ref([])
 // Lọc theo ô tìm kiếm
 const filteredAuthors = computed(() =>
     authors.value.filter(author =>
-        author.name.toLowerCase().includes(search.value.toLowerCase())
+        author.ho_ten.toLowerCase().includes(search.value.toLowerCase())
     )
 )
 
@@ -123,8 +123,12 @@ function closeDialog() {
 // Lưu tác giả mới hoặc cập nhật tác giả
 async function saveAuthor(values) {
     try {
-
-        await api.post('/api/authors', values)
+        const payload = {
+            ho_ten: values.name,
+            tieu_su: values.biography,
+            quoc_tich: values.nationality
+        }
+        await api.post('/api/authors', payload)
         message.value = 'Thêm tác giả thành công!'
 
         messageType.value = 'success'
@@ -155,7 +159,7 @@ async function deleteAuthor(id) {
 async function fetchAuthors() {
     try {
         const res = await api.get('/api/authors')
-        authors.value = res.data
+        authors.value = res.data.reverse()
     } catch (err) {
         console.error('Lỗi khi lấy danh sách tác giả:', err.response?.data?.message || err.message)
     }

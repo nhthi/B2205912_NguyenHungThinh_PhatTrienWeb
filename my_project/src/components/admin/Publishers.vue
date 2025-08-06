@@ -27,8 +27,8 @@
             <tbody>
                 <tr v-for="(publisher, index) in filteredPublishers" :key="publisher._id">
                     <td>{{ index + 1 }}</td>
-                    <td>{{ publisher.name }}</td>
-                    <td>{{ publisher.address }}</td>
+                    <td>{{ publisher.ten_nxb }}</td>
+                    <td>{{ publisher.dia_chi }}</td>
                     <td>
                         <v-btn icon color="blue" @click="$router.push(`/admin/publishers/edit/${publisher._id}`)">
                             <v-icon>mdi-pencil</v-icon>
@@ -90,8 +90,8 @@ const publisherSchema = yup.object({
 // Lọc theo ô tìm kiếm
 const filteredPublishers = computed(() =>
     publishers.value.filter(p =>
-        p.name.toLowerCase().includes(search.value.toLowerCase()) ||
-        p.address.toLowerCase().includes(search.value.toLowerCase())
+        p.ten_nxb.toLowerCase().includes(search.value.toLowerCase()) ||
+        p.dia_chi.toLowerCase().includes(search.value.toLowerCase())
     )
 )
 
@@ -111,8 +111,11 @@ function closeDialog() {
 // Lưu (thêm mới hoặc cập nhật)
 async function savePublisher(values) {
     try {
-
-        await api.post('/api/publishers', values)
+        const payload = {
+            ten_nxb: values.name,
+            dia_chi: values.address
+        }
+        await api.post('/api/publishers', payload)
         message.value = 'Thêm NXB thành công!'
 
         messageType.value = 'success'
@@ -143,7 +146,7 @@ async function deletePublisher(id) {
 async function fetchPublishers() {
     try {
         const res = await api.get('/api/publishers')
-        publishers.value = res.data
+        publishers.value = res.data.reverse()
     } catch (err) {
         console.error('Lỗi khi lấy danh sách NXB:', err.response?.data?.message || err.message)
     }

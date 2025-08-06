@@ -35,12 +35,16 @@
                     <tr class="text-gray-500 border-b">
                         <th class="py-2">Tên</th>
                         <th class="py-2">Email</th>
+                        <th class="py-2">Số điện thoại</th>
+
                     </tr>
                 </thead>
                 <tbody>
                     <tr v-for="reader in dashboardData.recentUsers" :key="reader._id" class="border-b">
-                        <td class="py-2">{{ reader.name }}</td>
+                        <td class="py-2">{{ reader.ho_ten }}</td>
                         <td class="py-2">{{ reader.email }}</td>
+                        <td class="py-2">{{ reader.so_dien_thoai }}</td>
+
                     </tr>
                 </tbody>
             </table>
@@ -60,9 +64,9 @@
                 </thead>
                 <tbody>
                     <tr v-for="book in dashboardData.recentBooks" :key="book._id" class="border-b">
-                        <td class="py-2">{{ book.title }}</td>
-                        <td class="py-2">{{ book.author.name }}</td>
-                        <td class="py-2">{{ book.category.name }}</td>
+                        <td class="py-2">{{ book.ten_sach }}</td>
+                        <td class="py-2">{{ book.author.ho_ten }}</td>
+                        <td class="py-2">{{ book.category.ten_the_loai }}</td>
 
                     </tr>
                 </tbody>
@@ -109,6 +113,8 @@ export default {
         async fetchDashboardData() {
             try {
                 const response = await api.get('/api/dashboard/overview');
+                console.log(response);
+
                 this.dashboardData = response.data;
                 const stats = response.data.borrowStatsLast7Days;
 

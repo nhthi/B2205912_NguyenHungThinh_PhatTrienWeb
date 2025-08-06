@@ -19,13 +19,13 @@
                 :validation-schema="schema" class="space-y-5 px-6 pb-6">
 
                 <Field name="userId" v-slot="{ field, errors }">
-                    <v-select v-bind="field" :items="users" item-title="name" item-value="_id" label="Độc giả"
+                    <v-select v-bind="field" :items="users" item-title="ho_ten" item-value="_id" label="Độc giả"
                         prepend-inner-icon="mdi-account" variant="outlined" color="black" :error-messages="errors"
                         class="mb-2" :model-value="field.value" @update:model-value="field.value = $event" />
                 </Field>
 
                 <Field name="bookId" v-slot="{ field, errors }">
-                    <v-select v-bind="field" :items="books" item-title="title" item-value="_id" label="Tên sách"
+                    <v-select v-bind="field" :items="books" item-title="ten_sach" item-value="_id" label="Tên sách"
                         prepend-inner-icon="mdi-book" variant="outlined" color="black" :error-messages="errors"
                         class="mb-2" :model-value="field.value" @update:model-value="field.value = $event" />
                 </Field>
@@ -102,12 +102,13 @@ export default {
 
                 const borrow = borrowRes.data
                 this.initialValues = {
-                    userId: borrow.userId,
-                    bookId: borrow.bookId,
-                    borrowDate: borrow.borrowDate.split('T')[0],
-                    dueDate: borrow.dueDate ? borrow.dueDate.split('T')[0] : '',
-                    fine: borrow.fine,
-                    status: borrow.status,
+                    userId: borrow.ma_doc_gia,
+                    bookId: borrow.ma_sach,
+                    borrowDate: borrow.ngay_muon.split('T')[0],
+                    dueDate: borrow.han_tra ? borrow.han_tra.split('T')[0] : '',
+                    fine: borrow.tien_phat,
+                    status: borrow.trang_thai,
+                    returnDate: borrow.ngay_tra_thuc_te
                 }
 
                 this.users = usersRes.data
@@ -121,7 +122,18 @@ export default {
         async submitForm(values) {
             const id = this.$route.params.id
             try {
-                await api.put(`/api/borrows/${id}`, values)
+                const payload = {
+                    ma_doc_gia: values.userId,
+                    ma_sach: values.bookId,
+                    ngay_muon: values.borrowDate,
+                    han_tra: values.dueDate,
+                    tien_phat: values.fine,
+                    trang_thai: values.status,
+                    ngay_tra_thuc_te: values.returnDate
+                }
+                console.log(payload);
+
+                await api.put(`/api/borrows/${id}`, payload)
                 this.message = 'Cập nhật phiếu mượn thành công!'
                 this.messageType = 'success'
                 setTimeout(() => this.$router.push('/admin/borrows'), 1000)
