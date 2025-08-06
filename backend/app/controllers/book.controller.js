@@ -5,7 +5,7 @@ const ApiError = require("../api-error");
 exports.create = async (req, res, next) => {
   try {
     const bookService = new BookService(MongoDB.client);
-    const payload = { ...req.body, createdAt: new Date() };
+    const payload = { ...req.body, ngay_tao: new Date() };
     const document = await bookService.create(payload);
     return res.send(document);
   } catch (error) {

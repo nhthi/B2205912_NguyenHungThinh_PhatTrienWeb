@@ -7,10 +7,8 @@ exports.create = async (req, res, next) => {
     const borrowService = new BorrowService(MongoDB.client);
     const payload = {
       ...req.body,
-      borrowDate: req.body.borrowDate
-        ? new Date(req.body.borrowDate)
-        : new Date(),
-      dueDate: req.body.dueDate ? new Date(req.body.dueDate) : null,
+      ngay_muon: req.body.ngay_muon ? new Date(req.body.ngay_muon) : new Date(),
+      han_tra: req.body.han_tra ? new Date(req.body.han_tra) : null,
     };
     const document = await borrowService.create(payload);
     return res.status(201).json(document);
@@ -57,11 +55,11 @@ exports.update = async (req, res, next) => {
     const borrowService = new BorrowService(MongoDB.client);
     const payload = {
       ...req.body,
-      borrowDate: req.body.borrowDate
-        ? new Date(req.body.borrowDate)
-        : new Date(),
-      dueDate: req.body.dueDate ? new Date(req.body.dueDate) : null,
-      returnDate: req.body.returnDate ? new Date(req.body.returnDate) : null,
+      ngay_muon: req.body.ngay_muon ? new Date(req.body.ngay_muon) : new Date(),
+      han_tra: req.body.han_tra ? new Date(req.body.han_tra) : null,
+      ngay_tra_thuc_te: req.body.ngay_tra_thuc_te
+        ? new Date(req.body.ngay_tra_thuc_te)
+        : null,
     };
     const document = await borrowService.update(req.params.id, payload);
     if (!document) {
@@ -78,7 +76,7 @@ exports.returnBook = async (req, res, next) => {
     const borrowService = new BorrowService(MongoDB.client);
     const document = await borrowService.returnBook(
       req.params.id,
-      req.body.returnDate
+      req.body.ngay_tra_thuc_te
     );
     if (!document) {
       return next(new ApiError(404, "Không tìm thấy phiếu mượn"));
@@ -116,7 +114,7 @@ exports.findByUserId = async (req, res, next) => {
   try {
     const borrowService = new BorrowService(MongoDB.client);
 
-    const borrows = await borrowService.find({ userId: req.params.userId });
+    const borrows = await borrowService.find({ ma_doc_gia: req.params.userId });
 
     return res.send(borrows);
   } catch (error) {

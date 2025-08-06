@@ -2,16 +2,16 @@ const { ObjectId } = require("mongodb");
 
 class CommentService {
   constructor(client) {
-    this.Comment = client.db().collection("comments"); // Tên collection là 'comments'
+    this.Comment = client.db().collection("danhgia"); // Tên collection là 'comments'
   }
 
   extractCommentData(payload) {
     const comment = {
-      userId: payload.userId,
-      bookId: payload.bookId,
-      content: payload.content,
-      rating: payload.rating || 5,
-      createdAt: payload.createdAt || new Date(),
+      ma_doc_gia: payload.ma_doc_gia,
+      ma_sach: payload.ma_sach,
+      noi_dung: payload.noi_dung,
+      ti_le: payload.ti_le || 5,
+      ngay_tao: payload.ngay_tao || new Date(),
     };
 
     // Xóa các trường undefined
@@ -37,18 +37,18 @@ class CommentService {
     const comments = await this.Comment.aggregate([
       {
         $match: {
-          bookId: bookId, // vì là string nên giữ nguyên
+          ma_sach: bookId, // vì là string nên giữ nguyên
         },
       },
       {
         $addFields: {
-          userId: { $toObjectId: "$userId" },
+          ma_doc_gia: { $toObjectId: "$ma_doc_gia" },
         },
       },
       {
         $lookup: {
-          from: "users",
-          localField: "userId",
+          from: "nguoidung",
+          localField: "ma_doc_gia",
           foreignField: "_id",
           as: "user",
         },
@@ -58,10 +58,10 @@ class CommentService {
       },
       {
         $project: {
-          content: 1,
-          createdAt: 1,
-          rating: 1,
-          "user.name": 1,
+          noi_dung: 1,
+          ngay_tao: 1,
+          ti_le: 1,
+          "user.ho_ten": 1,
           "user._id": 1,
         },
       },
@@ -73,16 +73,16 @@ class CommentService {
   async findByUserId(userId) {
     const comments = await this.Comment.aggregate([
       {
-        $match: { userId }, // userId là string, không cần chuyển đổi
+        $match: { ma_doc_gia: userId }, // userId là string, không cần chuyển đổi
       },
       {
         $addFields: {
-          bookId: { $toObjectId: "$bookId" },
+          bookId: { $toObjectId: "$ma_sach" },
         },
       },
       {
         $lookup: {
-          from: "books",
+          from: "sach",
           localField: "bookId",
           foreignField: "_id",
           as: "book",
@@ -93,10 +93,10 @@ class CommentService {
       },
       {
         $project: {
-          content: 1,
-          createdAt: 1,
-          rating: 1,
-          bookTitle: "$book.title",
+          noi_dung: 1,
+          ngay_tao: 1,
+          ti_le: 1,
+          ten_sach: "$book.ten_sach",
         },
       },
     ]).toArray();

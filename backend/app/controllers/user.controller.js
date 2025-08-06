@@ -7,10 +7,17 @@ const MongoDB = require("../utils/mongodb.util");
 const JWT_SECRET = process.env.JWT_SECRET || "library_staff_secret";
 
 exports.register = async (req, res, next) => {
-  const { userId, name, position, phone, address, email, password, role } =
-    req.body;
+  const {
+    ho_ten,
+    so_dien_thoai,
+    dia_chi,
+    email,
+    mat_khau,
+    trang_thai,
+    vai_tro,
+  } = req.body;
 
-  if (!name || !email || !password) {
+  if (!ho_ten || !email || !mat_khau) {
     return next(new ApiError(400, "Vui lòng điền đầy đủ thông tin bắt buộc"));
   }
 
@@ -24,17 +31,16 @@ exports.register = async (req, res, next) => {
       return next(new ApiError(400, "Email người dùng đã tồn tại"));
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(mat_khau, 10);
 
     const newUser = {
-      name,
-      position,
-      phone,
-      address,
+      ho_ten,
+      so_dien_thoai,
+      dia_chi,
       email,
-      password: hashedPassword,
-      role,
-      createdAt: new Date(),
+      mat_khau: hashedPassword,
+      trang_thai,
+      vai_tro,
     };
 
     const result = await userService.create(newUser);
@@ -63,17 +69,17 @@ exports.login = async (req, res, next) => {
     }
 
     const user = userList[0];
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await bcrypt.compare(password, user.mat_khau);
 
     if (!isMatch) {
       return next(new ApiError(401, "Mật khẩu không đúng"));
     }
 
-    if (user.status !== "active") {
+    if (user.trang_thai !== "active") {
       return next(new ApiError(401, "Tài khoản của bạn đang bị khóa!!!"));
     }
 
-    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, {
+    const token = jwt.sign({ id: user._id, role: user.vai_tro }, JWT_SECRET, {
       expiresIn: "1d",
     });
 
@@ -81,9 +87,9 @@ exports.login = async (req, res, next) => {
       token,
       user: {
         id: user._id,
-        name: user.name,
+        name: user.ho_ten,
         email: user.email,
-        role: user.role,
+        role: user.vai_tro,
       },
     });
   } catch (error) {
@@ -122,11 +128,8 @@ exports.update = async (req, res, next) => {
 };
 
 exports.getProfile = async (req, res, next) => {
-  console.log("requesID :" + req.id);
-
   try {
     const userService = new UserService(MongoDB.client);
-    console.log("requesID :" + req.id);
 
     const user = await userService.findById(req.id);
 
@@ -165,7 +168,6 @@ exports.deleteById = async (req, res, next) => {
   try {
     const userService = new UserService(MongoDB.client);
     const id = req.params.id;
-    console.log(id);
 
     const user = await userService.findById(id);
     if (!user) {

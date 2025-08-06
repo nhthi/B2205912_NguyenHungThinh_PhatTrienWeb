@@ -2,20 +2,20 @@ const { ObjectId } = require("mongodb");
 
 class BorrowService {
   constructor(client) {
-    this.Borrow = client.db().collection("borrows");
-    this.Book = client.db().collection("books");
+    this.Borrow = client.db().collection("theodoimuonsach");
+    this.Book = client.db().collection("sach");
   }
 
   extractBorrowData(payload) {
     const borrow = {
-      userId: payload.userId,
-      bookId: payload.bookId,
-      borrowDate: payload.borrowDate || new Date(),
-      dueDate: payload.dueDate, // hạn trả
-      returnDate: payload.returnDate || null, // ngày trả thực tế
-      fine: payload.fine || 0, // tiền phạt (nếu có)
-      status: payload.status || "pending",
-      quantity: payload.quantity || 1, // hoặc "returned"
+      ma_doc_gia: payload.ma_doc_gia,
+      ma_sach: payload.ma_sach,
+      ngay_muon: payload.ngay_muon || new Date(),
+      han_tra: payload.han_tra, // hạn trả
+      ngay_tra_thuc_te: payload.ngay_tra_thuc_te || null, // ngày trả thực tế
+      tien_phat: payload.tien_phat || 0, // tiền phạt (nếu có)
+      trang_thai: payload.trang_thai || "pending",
+      so_luong: payload.so_luong || 1, // hoặc "returned"
     };
 
     Object.keys(borrow).forEach(
@@ -28,18 +28,18 @@ class BorrowService {
     const borrow = this.extractBorrowData(payload);
 
     // Bước 1: Lấy thông tin sách từ collection
-    const book = await this.Book.findOne({ _id: new ObjectId(borrow.bookId) });
+    const book = await this.Book.findOne({ _id: new ObjectId(borrow.ma_sach) });
 
     if (!book) {
       throw new Error("Không tìm thấy sách");
     }
 
     // Bước 2: Kiểm tra quantity yêu cầu
-    const requestedQuantity = borrow.quantity || 1; // Giả sử người mượn nhập vào trường quantity
+    const requestedQuantity = borrow.so_luong || 1; // Giả sử người mượn nhập vào trường so_luong
 
-    if (book.quantity < requestedQuantity) {
+    if (book.so_luong < requestedQuantity) {
       throw new Error(
-        `Sách chỉ còn ${book.quantity} bản, không đủ số lượng yêu cầu (${requestedQuantity})`
+        `Sách chỉ còn ${book.so_luong} bản, không đủ số lượng yêu cầu (${requestedQuantity})`
       );
     }
 
@@ -49,25 +49,23 @@ class BorrowService {
     // Bước 4: Trừ số lượng sách
     await this.Book.updateOne(
       { _id: book._id },
-      { $inc: { quantity: -requestedQuantity } }
+      { $inc: { so_luong: -requestedQuantity } }
     );
 
     return result;
   }
 
   async find(filter) {
-    console.log(filter);
-
     const pipeline = [
       { $match: filter },
       {
         $addFields: {
-          bookObjectId: { $toObjectId: "$bookId" },
+          bookObjectId: { $toObjectId: "$ma_sach" },
         },
       },
       {
         $lookup: {
-          from: "books",
+          from: "sach",
           localField: "bookObjectId",
           foreignField: "_id",
           as: "book",
@@ -77,14 +75,14 @@ class BorrowService {
       {
         $project: {
           _id: 1,
-          userId: 1,
-          bookId: 1,
-          quantity: 1,
-          borrowDate: 1,
-          dueDate: 1,
-          returnDate: 1,
-          status: 1,
-          fine: 1,
+          ma_doc_gia: 1,
+          ma_sach: 1,
+          so_luong: 1,
+          ngay_muon: 1,
+          han_tra: 1,
+          ngay_tra_thuc_te: 1,
+          trang_thai: 1,
+          tien_phat: 1,
           book: 1, // dữ liệu từ books
         },
       },
@@ -107,44 +105,44 @@ class BorrowService {
       // Convert string ID to ObjectId
       {
         $addFields: {
-          userId: { $toObjectId: "$userId" },
-          bookId: { $toObjectId: "$bookId" },
+          userId: { $toObjectId: "$ma_doc_gia" },
+          bookId: { $toObjectId: "$ma_sach" },
         },
       },
 
       {
         $lookup: {
-          from: "users",
+          from: "nguoidung",
           localField: "userId",
           foreignField: "_id",
-          as: "user",
+          as: "docgia",
         },
       },
-      { $unwind: "$user" },
+      { $unwind: "$docgia" },
 
       {
         $lookup: {
-          from: "books",
+          from: "sach",
           localField: "bookId",
           foreignField: "_id",
-          as: "book",
+          as: "sach",
         },
       },
-      { $unwind: "$book" },
+      { $unwind: "$sach" },
 
       {
         $project: {
           _id: 1,
-          borrowDate: 1,
-          dueDate: 1,
-          returnDate: 1,
-          fine: 1,
-          status: 1,
-          "user._id": 1,
-          "user.name": 1,
-          "user.email": 1,
-          "book._id": 1,
-          "book.title": 1,
+          ngay_muon: 1,
+          han_tra: 1,
+          ngay_tra_thuc_te: 1,
+          tien_phat: 1,
+          trang_thai: 1,
+          "docgia._id": 1,
+          "docgia.ho_ten": 1,
+          "docgia.email": 1,
+          "sach._id": 1,
+          "sach.ten_sach": 1,
         },
       },
     ];
@@ -158,12 +156,12 @@ class BorrowService {
   }
 
   // Hàm cập nhật trả sách và tính tiền phạt nếu có
-  async returnBook(id, returnDate = new Date()) {
+  async returnBook(id, ngay_tra_thuc_te = new Date()) {
     const borrow = await this.findById(id);
     if (!borrow) return null;
 
-    const due = new Date(borrow.dueDate);
-    const returned = new Date(returnDate);
+    const due = new Date(borrow.han_tra);
+    const returned = new Date(ngay_tra_thuc_te);
 
     let fine = 0;
     if (returned > due) {
@@ -175,9 +173,9 @@ class BorrowService {
       { _id: new ObjectId(id) },
       {
         $set: {
-          returnDate: returned,
-          fine: fine,
-          status: "returned",
+          ngay_tra_thuc_te: returned,
+          tien_phat: fine,
+          trang_thai: "returned",
         },
       },
       { returnDocument: "after" }

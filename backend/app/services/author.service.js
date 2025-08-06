@@ -2,15 +2,14 @@ const { ObjectId } = require("mongodb");
 
 class AuthorService {
   constructor(client) {
-    this.Author = client.db().collection("authors"); // Tên collection
+    this.Author = client.db().collection("tacgia"); // Tên collection
   }
 
   extractAuthorData(payload) {
     const author = {
-      authorId: payload.authorId,
-      name: payload.name,
-      biography: payload.biography,
-      nationality: payload.nationality,
+      ho_ten: payload.ho_ten,
+      tieu_su: payload.tieu_su,
+      quoc_tich: payload.quoc_tich,
     };
 
     // Xoá các trường undefined
@@ -23,11 +22,11 @@ class AuthorService {
   async create(payload) {
     const author = this.extractAuthorData(payload);
     const result = await this.Author.findOneAndUpdate(
-      { authorId: author.authorId },
-      { $set: author },
-      { returnDocument: "after", upsert: true }
+      { ho_ten: author.ho_ten }, // Tìm theo tên tác giả
+      { $set: author }, // Cập nhật các trường author
+      { upsert: true, returnDocument: "after" } // Tạo mới nếu chưa có
     );
-    return result;
+    return result; // lấy `value`, không lấy nguyên `result`
   }
 
   async find(filter) {
@@ -37,7 +36,7 @@ class AuthorService {
 
   async findByName(name) {
     return await this.find({
-      name: { $regex: new RegExp(name, "i") },
+      ho_ten: { $regex: new RegExp(name, "i") },
     });
   }
 

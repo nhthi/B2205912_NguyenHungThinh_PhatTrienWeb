@@ -2,14 +2,13 @@ const { ObjectId } = require("mongodb");
 
 class PublisherService {
   constructor(client) {
-    this.Publisher = client.db().collection("publishers"); // Tên collection
+    this.Publisher = client.db().collection("nhaxuatban"); // Tên collection
   }
 
   extractPublisherData(payload) {
     const publisher = {
-      publisherId: payload.publisherId,
-      name: payload.name,
-      address: payload.address,
+      ten_nxb: payload.ten_nxb,
+      dia_chi: payload.dia_chi,
     };
 
     // Xoá các trường undefined
@@ -22,7 +21,7 @@ class PublisherService {
   async create(payload) {
     const publisher = this.extractPublisherData(payload);
     const result = await this.Publisher.findOneAndUpdate(
-      { publisherId: publisher.publisherId },
+      { ten_nxb: publisher.ten_nxb },
       { $set: publisher },
       { returnDocument: "after", upsert: true }
     );
@@ -36,7 +35,7 @@ class PublisherService {
 
   async findByName(name) {
     return await this.find({
-      name: { $regex: new RegExp(name, "i") },
+      ten_nxb: { $regex: new RegExp(name, "i") },
     });
   }
 

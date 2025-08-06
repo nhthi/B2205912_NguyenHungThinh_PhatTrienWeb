@@ -2,14 +2,13 @@ const { ObjectId } = require("mongodb");
 
 class CategoryService {
   constructor(client) {
-    this.Category = client.db().collection("categories"); // Tên collection
+    this.Category = client.db().collection("theloai"); // Tên collection
   }
 
   extractCategoryData(payload) {
     const category = {
-      categoryId: payload.categoryId,
-      name: payload.name,
-      description: payload.description,
+      ten_the_loai: payload.ten_the_loai,
+      mo_ta: payload.mo_ta,
     };
 
     // Xoá các trường undefined
@@ -22,7 +21,7 @@ class CategoryService {
   async create(payload) {
     const category = this.extractCategoryData(payload);
     const result = await this.Category.findOneAndUpdate(
-      { categoryId: category.categoryId },
+      { ten_the_loai: category.ten_the_loai },
       { $set: category },
       { returnDocument: "after", upsert: true }
     );
@@ -36,7 +35,7 @@ class CategoryService {
 
   async findByName(name) {
     return await this.find({
-      name: { $regex: new RegExp(name, "i") },
+      ten_the_loai: { $regex: new RegExp(name, "i") },
     });
   }
 

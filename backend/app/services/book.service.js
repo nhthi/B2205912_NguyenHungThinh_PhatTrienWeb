@@ -2,23 +2,24 @@ const { ObjectId } = require("mongodb");
 
 class BookService {
   constructor(client) {
-    this.Book = client.db().collection("books");
+    this.Book = client.db().collection("sach");
   }
 
   extractBookData(payload) {
     const book = {
-      title: payload.title,
-      publisherId: payload.publisherId
-        ? new ObjectId(payload.publisherId)
+      ten_sach: payload.ten_sach,
+      ma_nxb: payload.ma_nxb ? new ObjectId(payload.ma_nxb) : undefined,
+      ma_tac_gia: payload.ma_tac_gia
+        ? new ObjectId(payload.ma_tac_gia)
         : undefined,
-      authorId: payload.authorId ? new ObjectId(payload.authorId) : undefined,
-      categoryId: payload.categoryId
-        ? new ObjectId(payload.categoryId)
+      ma_the_loai: payload.ma_the_loai
+        ? new ObjectId(payload.ma_the_loai)
         : undefined,
-      description: payload.description,
-      publishYear: payload.publishYear,
-      coverImage: payload.coverImage,
-      quantity: payload.quantity || 1,
+      mo_ta: payload.mo_ta,
+      nam_xuat_ban: payload.nam_xuat_ban,
+      anh_bia: payload.anh_bia,
+      so_luong: payload.so_luong || 1,
+      ngay_tao: payload.ngay_tao || new Date(),
     };
 
     Object.keys(book).forEach(
@@ -31,7 +32,7 @@ class BookService {
   async create(payload) {
     const book = this.extractBookData(payload);
     const result = await this.Book.findOneAndUpdate(
-      { title: book.title, authorId: book.authorId },
+      { ten_sach: book.ten_sach, ma_tac_gia: book.ma_tac_gia },
       { $set: book },
       { returnDocument: "after", upsert: true }
     );
@@ -43,9 +44,9 @@ class BookService {
     return await cursor.toArray();
   }
 
-  async findByTitle(title) {
+  async findByTitle(ten_sach) {
     return await this.find({
-      title: { $regex: new RegExp(title, "i") },
+      ten_sach: { $regex: new RegExp(ten_sach, "i") },
     });
   }
 
@@ -58,29 +59,29 @@ class BookService {
       },
       {
         $lookup: {
-          from: "categories",
-          localField: "categoryId",
+          from: "theloai",
+          localField: "ma_the_loai",
           foreignField: "_id",
-          as: "category",
+          as: "theloai",
         },
       },
       {
         $unwind: {
-          path: "$category",
+          path: "$theloai",
           preserveNullAndEmptyArrays: true,
         },
       },
       {
         $lookup: {
-          from: "authors",
-          localField: "authorId",
+          from: "tacgia",
+          localField: "ma_tac_gia",
           foreignField: "_id",
-          as: "author",
+          as: "tacgia",
         },
       },
       {
         $unwind: {
-          path: "$author",
+          path: "$tacgia",
           preserveNullAndEmptyArrays: true,
         },
       },
@@ -114,20 +115,20 @@ class BookService {
     return result.deletedCount;
   }
 
-  async findAll(categoryId) {
+  async findAll(ma_the_loai) {
     try {
       const matchStage = {};
 
-      if (categoryId) {
-        matchStage.categoryId = new ObjectId(categoryId);
+      if (ma_the_loai) {
+        matchStage.ma_the_loai = new ObjectId(ma_the_loai);
       }
 
       const pipeline = [
         { $match: matchStage },
         {
           $lookup: {
-            from: "authors",
-            localField: "authorId",
+            from: "tacgia",
+            localField: "ma_tac_gia",
             foreignField: "_id",
             as: "authorInfo",
           },
@@ -141,12 +142,12 @@ class BookService {
         {
           $project: {
             _id: 1, // ID sách
-            title: 1, // Tiêu đề
-            coverImage: 1, // Ảnh bìa
-            description: 1, // Mô tả ✅
-            categoryId: 1, // ID thể loại
-            authorId: 1, // ID tác giả
-            authorName: "$authorInfo.name", // Tên tác giả
+            ten_sach: 1, // Tiêu đề
+            anh_bia: 1, // Ảnh bìa
+            mo_ta: 1, // Mô tả ✅
+            ma_the_loai: 1, // ID thể loại
+            ma_tac_gia: 1, // ID tác giả
+            ten_tac_gia: "$authorInfo.ho_ten", // Tên tác giả
           },
         },
       ];
@@ -166,44 +167,44 @@ class BookService {
       },
       {
         $lookup: {
-          from: "authors",
-          localField: "authorId",
+          from: "tacgia",
+          localField: "ma_tac_gia",
           foreignField: "_id",
-          as: "author",
+          as: "tacgia",
         },
       },
-      { $unwind: "$author" },
+      { $unwind: "$tacgia" },
 
       {
         $lookup: {
-          from: "publishers",
-          localField: "publisherId",
+          from: "nhaxuatban",
+          localField: "ma_nxb",
           foreignField: "_id",
-          as: "publisher",
+          as: "nhaxuatban",
         },
       },
-      { $unwind: "$publisher" },
+      { $unwind: "$nhaxuatban" },
 
       {
         $lookup: {
-          from: "categories",
-          localField: "categoryId",
+          from: "theloai",
+          localField: "ma_the_loai",
           foreignField: "_id",
-          as: "category",
+          as: "theloai",
         },
       },
-      { $unwind: "$category" },
+      { $unwind: "$theloai" },
 
       {
         $project: {
-          title: 1,
-          description: 1,
-          publishYear: 1,
-          coverImage: 1,
-          quantity: 1,
-          author: "$author.name",
-          publisher: "$publisher.name",
-          category: "$category.name",
+          ten_sach: 1,
+          mo_ta: 1,
+          nam_xuat_ban: 1,
+          anh_bia: 1,
+          so_luong: 1,
+          ten_tac_gia: "$tacgia.ho_ten",
+          ten_nxb: "$nhaxuatban.ten_nxb",
+          ten_the_loai: "$theloai.ten_the_loai",
         },
       },
     ];

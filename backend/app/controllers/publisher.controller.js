@@ -3,7 +3,7 @@ const MongoDB = require("../utils/mongodb.util");
 const ApiError = require("../api-error");
 
 exports.create = async (req, res, next) => {
-  if (!req.body?.name) {
+  if (!req.body?.ten_nxb) {
     return next(new ApiError(400, "Tên nhà xuất bản không được để trống"));
   }
 
@@ -21,9 +21,9 @@ exports.findAll = async (req, res, next) => {
 
   try {
     const publisherService = new PublisherService(MongoDB.client);
-    const { name } = req.query;
-    if (name) {
-      documents = await publisherService.findByName(name);
+    const { ten_nxb } = req.query;
+    if (ten_nxb) {
+      documents = await publisherService.findByName(ten_nxb);
     } else {
       documents = await publisherService.find({});
     }

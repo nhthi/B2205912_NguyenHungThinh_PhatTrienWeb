@@ -3,25 +3,24 @@ const MongoDB = require("../utils/mongodb.util");
 
 class UserService {
   constructor(client) {
-    this.User = client.db().collection("users");
-    this.Book = client.db().collection("books");
-    this.Borrow = client.db().collection("borrows");
+    this.User = client.db().collection("nguoidung");
+    this.Book = client.db().collection("sach");
+    this.Borrow = client.db().collection("theodoimuonsach");
   }
 
   extractUserData(payload) {
     const user = {
-      userId: payload.userId,
-      name: payload.name,
+      ho_ten: payload.ho_ten,
       email: payload.email,
-      position: payload.position,
-      phone: payload.phone,
-      password: payload.password,
-      address: payload.address,
-      role: payload.role ?? "reader",
-      status: payload.status ?? "active",
+      so_dien_thoai: payload.so_dien_thoai,
+      mat_khau: payload.mat_khau,
+      dia_chi: payload.dia_chi,
+      vai_tro: payload.vai_tro ?? "reader",
+      trang_thai: payload.trang_thai ?? "active",
+      ngay_tao: new Date(),
     };
 
-    // Xoá các trường undefined
+    // Xoá các trường undetien_phatd
     Object.keys(user).forEach(
       (key) => user[key] === undefined && delete user[key]
     );
@@ -31,10 +30,12 @@ class UserService {
   async create(payload) {
     const user = this.extractUserData(payload);
     const result = await this.User.findOneAndUpdate(
-      { email: user.email }, // dùng userId để kiểm tra trùng
+      { email: user.email },
       { $set: user },
       { returnDocument: "after", upsert: true }
     );
+    console.log(result);
+
     return result;
   }
 
@@ -45,7 +46,7 @@ class UserService {
 
   async findByName(name) {
     return await this.find({
-      name: { $regex: new RegExp(name, "i") },
+      ho_ten: { $regex: new RegExp(name, "i") },
     });
   }
 
@@ -109,7 +110,7 @@ class UserService {
         {
           $group: {
             _id: null,
-            totalFine: { $sum: "$fine" },
+            totalFine: { $sum: "$tien_phat" },
           },
         },
       ]).toArray();
@@ -122,21 +123,21 @@ class UserService {
         recentBooks,
         borrowStatsLast7Days,
       ] = await Promise.all([
-        this.User.countDocuments({ role: "reader" }), // Tổng số độc giả
+        this.User.countDocuments({ vai_tro: "reader" }), // Tổng số độc giả
         this.Book.countDocuments(), // Tổng số sách
         this.Borrow.countDocuments(), // Tổng số đơn mượn
-        this.User.find({ role: "reader" }) // 5 người dùng gần đây
-          .sort({ createdAt: -1 })
+        this.User.find({ vai_tro: "reader" }) // 5 người dùng gần đây
+          .sort({ ngay_tao: -1 })
           .limit(5)
           .toArray(),
         this.Book.aggregate([
           // Lấy 5 sách mới và join thêm tên tác giả, thể loại
-          { $sort: { createdAt: -1 } },
+          { $sort: { ngay_tao: -1 } },
           { $limit: 5 },
           {
             $lookup: {
-              from: "authors",
-              localField: "authorId",
+              from: "tacgia",
+              localField: "ma_tac_gia",
               foreignField: "_id",
               as: "author",
             },
@@ -149,8 +150,8 @@ class UserService {
           },
           {
             $lookup: {
-              from: "categories",
-              localField: "categoryId",
+              from: "theloai",
+              localField: "ma_the_loai",
               foreignField: "_id",
               as: "category",
             },
@@ -163,17 +164,17 @@ class UserService {
           },
           {
             $project: {
-              title: 1,
-              createdAt: 1,
-              "author.name": 1,
-              "category.name": 1,
+              ten_sach: 1,
+              ngay_tao: 1,
+              "author.ho_ten": 1,
+              "category.ten_the_loai": 1,
             },
           },
         ]).toArray(),
         this.Borrow.aggregate([
           {
             $match: {
-              borrowDate: {
+              ngay_muon: {
                 $gte: startDate,
                 $lte: endDate,
               },
@@ -181,14 +182,14 @@ class UserService {
           },
           {
             $project: {
-              borrowDate: {
-                $dateToString: { format: "%Y-%m-%d", date: "$borrowDate" },
+              ngay_muon: {
+                $dateToString: { format: "%Y-%m-%d", date: "$ngay_muon" },
               },
             },
           },
           {
             $group: {
-              _id: "$borrowDate",
+              _id: "$ngay_muon",
               count: { $sum: 1 },
             },
           },

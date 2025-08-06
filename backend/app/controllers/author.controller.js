@@ -6,10 +6,10 @@ const MongoDB = require("../utils/mongodb.util");
 exports.create = async (req, res, next) => {
   try {
     const authorService = new AuthorService(MongoDB.client);
-    const existing = await authorService.find({ authorId: req.body.authorId });
+    const existing = await authorService.find({ ho_ten: req.body.name });
 
     if (existing.length > 0) {
-      return next(new ApiError(400, "Mã tác giả đã tồn tại"));
+      return next(new ApiError(400, "Tên tác giả đã tồn tại"));
     }
 
     const result = await authorService.create(req.body);
