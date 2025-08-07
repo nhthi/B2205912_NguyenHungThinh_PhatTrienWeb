@@ -19,13 +19,13 @@ export default {
     data() {
         return {
             menuItems: [
-                { title: 'Dashboard', icon: 'dashboard', to: '/admin/dashboard' },
-                { title: 'Users', icon: 'person', to: '/admin/users' },
-                { title: 'Books', icon: 'menu_book', to: '/admin/books' },
-                { title: 'Categories', icon: 'category', to: '/admin/categories' },
-                { title: 'Publishers', icon: 'business', to: '/admin/publishers' },
-                { title: 'Authors', icon: 'edit', to: '/admin/authors' },
-                { title: 'Borrows', icon: 'shopping_cart', to: '/admin/borrows' },
+                { title: 'Tổng quan', icon: 'dashboard', to: '/admin/dashboard' },
+                { title: 'Người dùng', icon: 'person', to: '/admin/users' },
+                { title: 'Sách', icon: 'menu_book', to: '/admin/books' },
+                { title: 'Thể loại', icon: 'category', to: '/admin/categories' },
+                { title: 'Nhà xuất bản', icon: 'business', to: '/admin/publishers' },
+                { title: 'Tác giả', icon: 'edit', to: '/admin/authors' },
+                { title: 'Theo dõi mượn sách', icon: 'shopping_cart', to: '/admin/borrows' },
             ]
 
         }

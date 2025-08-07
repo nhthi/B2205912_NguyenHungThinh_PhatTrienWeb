@@ -71,6 +71,22 @@ exports.update = async (req, res, next) => {
   }
 };
 
+exports.approve = async (req, res, next) => {
+  try {
+    const borrowService = new BorrowService(MongoDB.client);
+    const payload = {
+      ...req.body,
+    };
+    const document = await borrowService.update(req.params.id, payload);
+    if (!document) {
+      return next(new ApiError(404, "Không tìm thấy phiếu mượn"));
+    }
+    return res.send(document);
+  } catch (error) {
+    return next(new ApiError(500, "Lỗi khi cập nhật phiếu mượn"));
+  }
+};
+
 exports.returnBook = async (req, res, next) => {
   try {
     const borrowService = new BorrowService(MongoDB.client);

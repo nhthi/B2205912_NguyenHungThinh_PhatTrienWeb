@@ -33,7 +33,8 @@
                     <td>{{ author.quoc_tich }}</td>
                     <td>{{ author.tieu_su }}</td>
                     <td>
-                        <v-btn icon color="blue" @click="$router.push(`/admin/authors/edit/${author._id}`)">
+                        <v-btn icon color="blue" class="my-2"
+                            @click="$router.push(`/admin/authors/edit/${author._id}`)">
                             <v-icon>mdi-pencil</v-icon>
                         </v-btn>
                         <v-btn icon color="red" @click="deleteAuthor(author._id)">

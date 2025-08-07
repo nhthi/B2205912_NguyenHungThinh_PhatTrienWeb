@@ -31,14 +31,16 @@
                     <td>{{ reader.ho_ten }}</td>
                     <td>{{ reader.email }}</td>
                     <td>{{ reader.so_dien_thoai || '' }}</td>
-                    <td>{{ reader.dia_chi || '' }}</td>
+                    <td>
+                        {{ reader.dia_chi || '' }}
+                    </td>
                     <td>
                         <v-chip :color="reader.trang_thai === 'active' ? 'green' : 'red'" variant="flat" size="small">
                             {{ reader.trang_thai === 'active' ? 'Hoạt động' : 'Khoá' }}
                         </v-chip>
                     </td>
                     <td>
-                        <v-btn color="blue" icon @click="$router.push(`/admin/users/edit/${reader._id}`)">
+                        <v-btn color="blue" class="my-2" icon @click="$router.push(`/admin/users/edit/${reader._id}`)">
                             <v-icon>mdi-pencil</v-icon>
                         </v-btn>
                         <v-btn icon color="red" @click="deleteReader(reader._id)">

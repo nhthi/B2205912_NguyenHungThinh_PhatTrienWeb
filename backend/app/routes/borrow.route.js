@@ -18,6 +18,8 @@ router
 
 // Route để trả sách
 router.route("/:id/return").put(verifyToken, borrowController.returnBook);
+router.route("/:id/approve").put(verifyToken, borrowController.approve);
+
 router.get("/user/:userId", borrowController.findByUserId);
 
 module.exports = router;

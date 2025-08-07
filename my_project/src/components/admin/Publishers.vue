@@ -30,7 +30,8 @@
                     <td>{{ publisher.ten_nxb }}</td>
                     <td>{{ publisher.dia_chi }}</td>
                     <td>
-                        <v-btn icon color="blue" @click="$router.push(`/admin/publishers/edit/${publisher._id}`)">
+                        <v-btn icon color="blue" class="my-2 mr-2"
+                            @click="$router.push(`/admin/publishers/edit/${publisher._id}`)">
                             <v-icon>mdi-pencil</v-icon>
                         </v-btn>
                         <v-btn icon color="red" @click="deletePublisher(publisher._id)">

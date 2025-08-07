@@ -38,7 +38,8 @@
                         </v-chip>
                     </td>
                     <td>
-                        <v-btn color="blue" icon @click="$router.push(`/admin/users/edit/${reader._id}`)">
+                        <v-btn color="blue" class="mr-2 my-2" icon
+                            @click="$router.push(`/admin/users/edit/${reader._id}`)">
                             <v-icon>mdi-pencil</v-icon>
                         </v-btn>
                         <v-btn icon color="red" @click="deleteReader(reader._id)">

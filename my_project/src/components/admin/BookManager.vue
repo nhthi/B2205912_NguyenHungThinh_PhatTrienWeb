@@ -32,8 +32,10 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="(book, index) in filteredBooks" :key="book._id">
-                    <td>{{ index + 1 }}</td>
+                <!-- <tr v-for="(book, index) in filteredBooks" :key="book._id"> -->
+                <tr v-for="(book, index) in paginatedBooks" :key="book._id">
+                    <td>{{ (currentPage - 1) * itemsPerPage + index + 1 }}</td>
+                    <!-- <td>{{ index + 1 }}</td> -->
                     <td>
                         <img :src="book.anh_bia" alt="Bìa sách" class="w-20 h-28 object-cover rounded shadow my-2" />
                     </td>
@@ -44,9 +46,16 @@
                     <td>{{ book.ten_nxb }}</td>
                     <td>{{ book.nam_xuat_ban }}</td>
                     <td>{{ book.so_luong }}</td>
-                    <td>{{ book.mo_ta }}</td>
+                    <td class="">
+                        <div class="tooltip-container">
+                            <div class="truncate-multi-line">
+                                {{ book.mo_ta }}
+                            </div>
+                            <span class="tooltip-text">{{ book.mo_ta }}</span>
+                        </div>
+                    </td>
                     <td>
-                        <v-btn icon color="blue" @click="$router.push(`/admin/books/edit/${book._id}`)">
+                        <v-btn icon color="blue" class="my-1" @click="$router.push(`/admin/books/edit/${book._id}`)">
                             <v-icon>mdi-pencil</v-icon>
                         </v-btn>
                         <v-btn icon color="red" @click="deleteBook(book._id)">
@@ -56,7 +65,13 @@
                 </tr>
             </tbody>
         </v-table>
-
+        <div class="flex justify-between items-center mt-4">
+            <span>Trang {{ currentPage }} / {{ totalPages }}</span>
+            <div class="space-x-2">
+                <v-btn size="small" :disabled="currentPage === 1" @click="currentPage--">Trước</v-btn>
+                <v-btn size="small" :disabled="currentPage === totalPages" @click="currentPage++">Sau</v-btn>
+            </div>
+        </div>
         <!-- Dialog Thêm/Sửa -->
         <v-dialog v-model="dialog" max-width="500px">
             <v-card>
@@ -120,7 +135,8 @@ import { ref, computed, onMounted } from 'vue'
 import { Form, Field } from 'vee-validate'
 import * as yup from 'yup'
 import api from '@/services/api.service'
-
+const currentPage = ref(1)
+const itemsPerPage = ref(5)
 // Data
 const books = ref([])
 const dialog = ref(false)
@@ -150,6 +166,13 @@ const filteredBooks = computed(() =>
         b.ten_nxb.toLowerCase().includes(search.value.toLowerCase())
     )
 )
+const totalPages = computed(() => Math.ceil(filteredBooks.value.length / itemsPerPage.value))
+
+const paginatedBooks = computed(() => {
+    const start = (currentPage.value - 1) * itemsPerPage.value
+    const end = start + itemsPerPage.value
+    return filteredBooks.value.slice(start, end)
+})
 async function fetchAuthors() {
     const res = await api.get('/api/authors')
     authors.value = res.data
@@ -226,7 +249,10 @@ async function deleteBook(id) {
         }
     }
 }
-
+import { watch } from 'vue'
+watch(search, () => {
+    currentPage.value = 1
+})
 onMounted(() => {
     fetchBooks()
     fetchAuthors()
@@ -234,3 +260,43 @@ onMounted(() => {
     fetchPublishers()
 })
 </script>
+<style scoped>
+.truncate-multi-line {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+    max-width: 300px;
+    line-height: 1.4em;
+    max-height: 4.2em;
+    /* 3 dòng x line-height */
+}
+
+.tooltip-container {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip-text {
+    visibility: hidden;
+    background-color: black;
+    color: #fff;
+    text-align: left;
+    padding: 5px;
+    border-radius: 4px;
+    position: absolute;
+    z-index: 1;
+    bottom: 100%;
+    /* phía trên */
+    left: 0;
+    width: max-content;
+    max-width: 300px;
+    white-space: normal;
+}
+
+.tooltip-container:hover .tooltip-text {
+    visibility: visible;
+}
+</style>

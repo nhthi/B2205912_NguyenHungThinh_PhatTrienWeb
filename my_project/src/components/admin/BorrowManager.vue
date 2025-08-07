@@ -24,7 +24,7 @@
                     <th>Hạn trả</th>
                     <th>Ngày trả thực</th>
                     <th>Tiền phạt</th>
-                    <th>Trạng thái</th>
+                    <th class="text-center">Trạng thái</th>
                     <th>Duyệt/ Trả</th>
                     <th>Hành động</th>
                 </tr>
@@ -46,7 +46,7 @@
                             {{ formatCurrency(borrow.tien_phat) }}
                         </span>
                     </td>
-                    <td>
+                    <td class="text-center">
                         <v-chip class="font-bold"
                             :color="borrow.trang_thai === 'borrowing' ? 'blue' : borrow.trang_thai === 'pending' ? 'red' : 'green'"
                             variant="flat">
@@ -68,10 +68,11 @@
                     </td>
 
                     <td>
-                        <v-btn icon color="blue" @click="$router.push(`/admin/borrows/edit/${borrow._id}`)">
+                        <v-btn class="my-1" icon color="blue"
+                            @click="$router.push(`/admin/borrows/edit/${borrow._id}`)">
                             <v-icon>mdi-pencil</v-icon>
                         </v-btn>
-                        <v-btn icon color="red" @click="deleteBorrow(borrow._id)">
+                        <v-btn icon class="my-1" color="red" @click="deleteBorrow(borrow._id)">
                             <v-icon>mdi-delete</v-icon>
                         </v-btn>
                     </td>
@@ -139,7 +140,7 @@ async function handleReturn(borrowId) {
 
 async function handleApprove(borrowId) {
     try {
-        await api.put(`/api/borrows/${borrowId}`, {
+        await api.put(`/api/borrows/${borrowId}/approve`, {
             trang_thai: 'borrowing', // hoặc dùng dayjs nếu cần định dạng
         });
         message.value = 'Duyệt đăng ký mượn thành công!'

@@ -32,7 +32,8 @@
                     <td>{{ category.mo_ta }}</td>
 
                     <td>
-                        <v-btn icon color="blue" @click="$router.push(`/admin/categories/edit/${category._id}`)">
+                        <v-btn icon color="blue" class="my-2 mr-2"
+                            @click="$router.push(`/admin/categories/edit/${category._id}`)">
                             <v-icon>mdi-pencil</v-icon>
                         </v-btn>
                         <v-btn icon color="red" @click="deleteCategory(category._id)">
