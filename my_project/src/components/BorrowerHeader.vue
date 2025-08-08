@@ -11,7 +11,7 @@
                 <template v-slot:activator="{ props }">
                     <v-btn v-bind="props" text class="d-flex align-center">
                         <v-avatar size="32" class="mr-2">
-                            <img :src="user.avatar || defaultAvatar" alt="Avatar" />
+                            <img :src="user.anh_dai_dien || defaultAvatar" alt="Avatar" />
                         </v-avatar>
                         <span>{{ user.name || 'Tài khoản' }}</span>
                     </v-btn>

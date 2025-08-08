@@ -4,7 +4,8 @@
         <v-card class="rounded-2xl shadow-md bg-white p-6 px-6 py-6">
             <div class="flex items-center gap-6">
                 <v-avatar size="80">
-                    <img :src="user.avatar || 'https://cdn-icons-png.flaticon.com/512/8345/8345328.png'" alt="avatar" />
+                    <img :src="user.anh_dai_dien || 'https://cdn-icons-png.flaticon.com/512/8345/8345328.png'"
+                        alt="avatar" />
                 </v-avatar>
                 <div>
                     <h2 class="text-2xl font-bold text-gray-900">{{ user.ho_ten }}</h2>
@@ -127,6 +128,8 @@
                 <v-alert v-if="serverError" type="error" dense text>
                     {{ serverError }}
                 </v-alert>
+                <v-file-input label="Chọn ảnh đại diện" accept="image/*" @change="handleAvatarUpload" dense outlined
+                    show-size prepend-icon="mdi-camera" />
                 <v-text-field label="Họ tên" v-model="editForm.name" :rules="[v => !!v || 'Họ tên không được để trống']"
                     dense outlined />
                 <v-text-field label="Email" v-model="editForm.email" :rules="[v => !!v || 'Email không được để trống']"
@@ -150,7 +153,7 @@
 
 <script>
 import api from '@/services/api.service'
-
+import { uploadToCloundinary } from "@/utils/uploadToCloudinary"; // nếu bạn đã tách hàm
 export default {
     name: "UserProfile",
     data() {
@@ -167,7 +170,8 @@ export default {
                 name: '',
                 email: '',
                 phone: '',
-                address: ''
+                address: '',
+                avatar: null // new field
             },
             serverError: "",
             deleteMessage: ""
@@ -193,13 +197,26 @@ export default {
                 console.error("Lỗi khi xoá đánh giá:", error);
             }
         },
+        async handleAvatarUpload(event) {
+            const file = event.target.files[0]; // ✅ lấy file đúng cách
+            if (file) {
+                try {
+                    const uploadedUrl = await uploadToCloundinary(file, "image");
+                    this.editForm.avatar = uploadedUrl;
+                } catch (err) {
+                    console.error("❌ Upload ảnh thất bại:", err);
+                    this.serverError = "❌ Upload ảnh thất bại. Vui lòng thử lại.";
+                }
+            }
+        },
         editProfile() {
             if (this.user) {
                 this.editForm = {
                     name: this.user.ho_ten,
                     email: this.user.email,
                     phone: this.user.so_dien_thoai,
-                    address: this.user.dia_chi
+                    address: this.user.dia_chi,
+                    avatar: this.user.avatar || ''
                 };
                 this.editDialog = true;
             }
@@ -219,8 +236,13 @@ export default {
                     ho_ten: this.editForm.name,
                     email: this.editForm.email,
                     so_dien_thoai: this.editForm.phone,
-                    dia_chi: this.editForm.address
+                    dia_chi: this.editForm.address,
+                    avatar: this.editForm.avatar || this.user.avatar,
+                    vai_tro: this.user.vai_tro
+
                 }
+                console.log(payload);
+
                 const response = await api.put(`/api/users/${this.user._id}`, payload);
                 this.user = response.data; // Cập nhật lại thông tin hiển thị
                 this.editDialog = false;

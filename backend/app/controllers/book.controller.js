@@ -75,7 +75,7 @@ exports.delete = async (req, res, next) => {
 
     return res.send({ message: "Xoá sách thành công" });
   } catch (error) {
-    return next(new ApiError(500, `Không thể xoá sách id=${req.params.id}`));
+    return next(new ApiError(500, error.message || "Có lỗi khi xóa sách"));
   }
 };
 

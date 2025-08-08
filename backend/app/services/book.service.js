@@ -2,6 +2,7 @@ const { ObjectId } = require("mongodb");
 
 class BookService {
   constructor(client) {
+    this.Borrow = client.db().collection("theodoimuonsach");
     this.Book = client.db().collection("sach");
   }
 
@@ -104,9 +105,24 @@ class BookService {
   }
 
   async delete(id) {
-    const result = await this.Book.findOneAndDelete({
-      _id: ObjectId.isValid(id) ? new ObjectId(id) : null,
-    });
+    const bookId = ObjectId.isValid(id) ? new ObjectId(id) : null;
+    if (!bookId) {
+      throw new Error("❌ ID không hợp lệ.");
+    }
+
+    // Kiểm tra xem sách đã được mượn hay chưa
+    const borrowed = await this.Borrow.findOne({ ma_sach: id });
+    if (borrowed) {
+      throw new Error("❌ Không thể xóa sách vì đã được mượn.");
+    }
+
+    // Nếu chưa được mượn, tiến hành xóa
+    const result = await this.Book.findOneAndDelete({ _id: bookId });
+
+    if (!result) {
+      throw new Error("❌ Không tìm thấy sách để xóa.");
+    }
+
     return result;
   }
 

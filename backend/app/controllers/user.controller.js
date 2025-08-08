@@ -90,6 +90,7 @@ exports.login = async (req, res, next) => {
         name: user.ho_ten,
         email: user.email,
         role: user.vai_tro,
+        anh_dai_dien: user.anh_dai_dien || null,
       },
     });
   } catch (error) {

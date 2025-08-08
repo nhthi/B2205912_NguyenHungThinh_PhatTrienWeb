@@ -18,6 +18,7 @@ class UserService {
       vai_tro: payload.vai_tro ?? "reader",
       trang_thai: payload.trang_thai ?? "active",
       ngay_tao: new Date(),
+      anh_dai_dien: payload.avatar || null,
     };
 
     // Xoá các trường undetien_phatd
